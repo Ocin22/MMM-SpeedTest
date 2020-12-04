@@ -1,0 +1,15 @@
+{
+  "name": "MMM-SpeedTest",
+  "version": "0.9.0",
+  "description": "SpeedTest Magic Mirror.",
+  "main": "index.js",
+  "keywords": [
+    "internet",
+    "speed"
+  ],
+  "author": "Debayan Deb",
+  "license": "MIT",
+  "dependencies": {
+    "speedtest-net": "^1.6.2"
+  }
+}
