@@ -35,6 +35,8 @@ Module.register("MMM-SpeedTest",{
     this.download = null
     this.updload = null
     this.ping = null
+    if (this.config.debug) this.log = (...args) => { console.log("[SPEED]", ...args) }
+    else this.log = (...args) => { /* do nothing */ }
     this.sendSocketNotification("INIT", this.config)
   },
 
@@ -59,20 +61,20 @@ Module.register("MMM-SpeedTest",{
 
   socketNotificationReceived: function(notification, payload) {
     if (notification == "DOWNLOAD") {
-      console.log("DOWNLOAD", payload, "Mbps")
+      this.log("DOWNLOAD", payload, "Mbps")
       this.download.refresh(payload)
     }
     if (notification == "UPLOAD") {
-      console.log("UPLOAD", payload, "Mbps")
+      this.log("UPLOAD", payload, "Mbps")
       if (this.config.upload.display) this.upload.refresh(payload)
     }
     if (notification == "PING") {
       this.DisplayReset()
-      console.log("PING", payload, "ms")
+      this.log("PING", payload, "ms")
       if (this.config.ping.display) this.ping.refresh(payload)
     }
     if (notification == "DATA") {
-      console.log("DATA", payload)
+      this.log("DATA", payload)
       if (this.config.informations) this.DisplayData(payload)
       this.DisplayFooter()
     }
@@ -102,7 +104,7 @@ Module.register("MMM-SpeedTest",{
       var data = document.createElement("div")
       data.id = "ST_Data"
       data.classList.add("hidden")
-      
+
       var ISP = document.createElement("div")
       ISP.id = "ST_ISP"
       var ISP_MARK = document.createElement("div")
@@ -112,7 +114,7 @@ Module.register("MMM-SpeedTest",{
       ISP_CONTENT.id = "ST_ISP_CONTENT"
       ISP.appendChild(ISP_MARK)
       ISP.appendChild(ISP_CONTENT)
-  
+
       var Server = document.createElement("div")
       Server.id = "ST_Server"
       var Server_MARK = document.createElement("div")
@@ -122,7 +124,7 @@ Module.register("MMM-SpeedTest",{
       Server_CONTENT.id = "ST_Server_CONTENT"
       Server.appendChild(Server_MARK)
       Server.appendChild(Server_CONTENT)
-  
+
       var Location = document.createElement("div")
       Location.id = "ST_Location"
       var Location_MARK = document.createElement("div")
