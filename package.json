@@ -1,15 +1,19 @@
 {
   "name": "MMM-SpeedTest",
-  "version": "0.9.0",
+  "version": "0.9.0-Dev",
   "description": "SpeedTest Magic Mirror.",
   "main": "index.js",
+  "scripts": {
+    "postinstall": "echo 'Building SpeedTest module, please wait...' && electron-rebuild 2>/dev/null >/dev/null"
+  },
   "keywords": [
     "internet",
     "speed"
   ],
-  "author": "Debayan Deb",
+  "author": "bugsounet",
   "license": "MIT",
   "dependencies": {
-    "speedtest-net": "^1.6.2"
+    "electron-rebuild": "^2.3.4",
+    "speedtest-net": "^2.1.1"
   }
 }

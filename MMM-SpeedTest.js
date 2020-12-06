@@ -7,7 +7,6 @@
 Module.register("MMM-SpeedTest",{
   defaults : {
     debug: false,
-    maxTime: "20s",
     update: "1h",
     colored: true,
     download: {
@@ -19,23 +18,36 @@ Module.register("MMM-SpeedTest",{
       title: "Upload Speed",
       scale: 100
     },
-    informations: true
+    ping: {
+      display: true,
+      title: "Ping",
+      scale: 100
+    },
+    informations: true,
+    server: {
+      preferedId: null,
+      acceptLicense: true,
+      acceptGdpr: true
+    }
   },
 
   start : function(){
     this.download = null
     this.updload = null
     this.ping = null
-    this.config.maxTime = this.getUpdateTime(this.config.maxTime)
     this.sendSocketNotification("INIT", this.config)
   },
 
   getScripts: function(){
-      return [this.file("resources/justgage.js"),this.file("resources/raphael-2.1.4.min.js"),this.file("resources/jquery.js")]
+    return [
+      this.file("resources/justgage.js"),
+      this.file("resources/raphael-2.1.4.min.js"),
+      this.file("resources/jquery.js")
+    ]
   },
 
   getStyles: function(){
-      return ["MMM-SpeedTest.css"]
+    return ["MMM-SpeedTest.css"]
   },
 
   notificationReceived: function (noti, payload) {
@@ -48,15 +60,19 @@ Module.register("MMM-SpeedTest",{
   socketNotificationReceived: function(notification, payload) {
     if (notification == "DOWNLOAD") {
       console.log("DOWNLOAD", payload, "Mbps")
-      this.DisplayReset()
       this.download.refresh(payload)
     }
     if (notification == "UPLOAD") {
       console.log("UPLOAD", payload, "Mbps")
       if (this.config.upload.display) this.upload.refresh(payload)
     }
-    if (notification == 'DATA') {
-      console.log("DATA:", payload)
+    if (notification == "PING") {
+      this.DisplayReset()
+      console.log("PING", payload, "ms")
+      if (this.config.ping.display) this.ping.refresh(payload)
+    }
+    if (notification == "DATA") {
+      console.log("DATA", payload)
       if (this.config.informations) this.DisplayData(payload)
       this.DisplayFooter()
     }
@@ -70,10 +86,16 @@ Module.register("MMM-SpeedTest",{
     download.id = 'ST_Download'
     wrapper.appendChild(download)
 
-    if (this.config.informations) {
+    if (this.config.upload.display) {
       var upload = document.createElement("div")
       upload.id = 'ST_Upload'
       wrapper.appendChild(upload)
+    }
+
+    if (this.config.ping.display) {
+      var ping = document.createElement("div")
+      ping.id = 'ST_Ping'
+      wrapper.appendChild(ping)
     }
 
     if (this.config.informations) {
@@ -110,21 +132,21 @@ Module.register("MMM-SpeedTest",{
       Location_CONTENT.id = "ST_Location_CONTENT"
       Location.appendChild(Location_MARK)
       Location.appendChild(Location_CONTENT)
-  
-      var Distance = document.createElement("div")
-      Distance.id = "ST_Distance"
-      var Distance_MARK = document.createElement("div")
-      Distance_MARK.id = "ST_Distance_MARK"
-      Distance_MARK.textContent = "Distance:"
-      var Distance_CONTENT = document.createElement("div")
-      Distance_CONTENT.id = "ST_Distance_CONTENT"
-      Distance.appendChild(Distance_MARK)
-      Distance.appendChild(Distance_CONTENT)
-  
+
+      var Name = document.createElement("div")
+      Name.id = "ST_Name"
+      var Name_MARK = document.createElement("div")
+      Name_MARK.id = "ST_Name_MARK"
+      Name_MARK.textContent = "Name:"
+      var Name_CONTENT = document.createElement("div")
+      Name_CONTENT.id = "ST_Name_CONTENT"
+      Name.appendChild(Name_MARK)
+      Name.appendChild(Name_CONTENT)
+
       data.appendChild(ISP)
       data.appendChild(Server)
+      data.appendChild(Name)
       data.appendChild(Location)
-      data.appendChild(Distance)
       wrapper.appendChild(data)
     }
 
@@ -146,19 +168,27 @@ Module.register("MMM-SpeedTest",{
       valueFontFamily: "Roboto Condensed",
       titleFontFamily: "Roboto Condensed",
       titleFontColor: "#aaa",
-      symbol: " Mbps"
     }
 
     let downOpts = {
       id: "ST_Download",
       max: this.config.download.scale,
-      title: this.config.download.title
+      title: this.config.download.title,
+      symbol: " Mbps"
     }
 
     let upOpts = {
       id: "ST_Upload",
       max: this.config.upload.scale,
-      title: this.config.upload.title
+      title: this.config.upload.title,
+      symbol: " Mbps"
+    }
+
+    let pingOpts = {
+      id: "ST_Ping",
+      max: this.config.ping.scale,
+      title: this.config.ping.title,
+      symbol: " ms"
     }
 
     let noColor = {
@@ -176,21 +206,25 @@ Module.register("MMM-SpeedTest",{
       upOpts = Object.assign({}, opts, upOpts)
       this.upload =new JustGage(upOpts)
     }
+
+    if (this.config.ping.display) {
+      pingOpts = Object.assign({}, opts, pingOpts)
+      this.ping =new JustGage(pingOpts)
+    }
   },
 
   DisplayData: function(payload) {
     var data = document.getElementById("ST_Data")
     var ISP = document.getElementById("ST_ISP_CONTENT")
     var Server = document.getElementById("ST_Server_CONTENT")
+    var Name = document.getElementById("ST_Name_CONTENT")
     var Location = document.getElementById("ST_Location_CONTENT")
-    var Distance = document.getElementById("ST_Distance_CONTENT")
 
     data.classList.remove("hidden")
-    ISP.textContent = payload.client.isp
+    ISP.textContent = payload.isp
     Server.textContent = payload.server.host
+    Name.textContent = payload.server.name + " (id: " + payload.server.id + ")"
     Location.textContent = payload.server.location  + " (" + payload.server.country + ")"
-    if (config.units == "metric") Distance.textContent =  payload.server.distance + " km"
-    else Distance.textContent =  payload.server.distanceMi + " miles"
   },
 
   DisplayReset: function() {
@@ -199,57 +233,22 @@ Module.register("MMM-SpeedTest",{
       var ISP = document.getElementById("ST_ISP_CONTENT")
       var Server = document.getElementById("ST_Server_CONTENT")
       var Location = document.getElementById("ST_Location_CONTENT")
-      var Distance = document.getElementById("ST_Distance_CONTENT")
-  
+      var Name = document.getElementById("ST_Name_CONTENT")
+
       data.classList.add("hidden")
       ISP.textContent = ""
       Server.textContent = ""
       Location.textContent = ""
-      Distance.textContent = ""
+      Name.textContent = ""
     }
     var TestDate = document.getElementById("ST_LastTest")
     TestDate.textContent = "Checking..."
+    if (this.config.download.display) this.upload.refresh("0")
     if (this.config.upload.display) this.upload.refresh("0")
   },
 
   DisplayFooter() {
     var TestDate = document.getElementById("ST_LastTest")
     TestDate.textContent = "Last Update: " + new Date().toLocaleDateString(config.language, {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
-  },
-
-  /** convert h m s to ms **/
-  getUpdateTime: function(str) {
-    let ms = 0, time, type, value
-    let time_list = ('' + str).split(' ').filter(v => v != '' && /^(\d{1,}\.)?\d{1,}([wdhms])?$/i.test(v))
-
-    for(let i = 0, len = time_list.length; i < len; i++){
-      time = time_list[i]
-      type = time.match(/[wdhms]$/i)
-
-      if(type){
-        value = Number(time.replace(type[0], ''))
-
-        switch(type[0].toLowerCase()){
-          case 'w':
-            ms += value * 604800000
-            break
-          case 'd':
-            ms += value * 86400000
-            break
-          case 'h':
-            ms += value * 3600000
-            break
-          case 'm':
-            ms += value * 60000
-            break
-          case 's':
-            ms += value * 1000
-          break
-        }
-      } else if(!isNaN(parseFloat(time)) && isFinite(time)){
-        ms += parseFloat(time)
-      }
-    }
-    return ms
-  },
+  }
 });

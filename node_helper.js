@@ -25,28 +25,42 @@ module.exports = NodeHelper.create({
     if (notification == 'CHECK') this.check()
   },
 
-  check() {
-    console.log("[SPEED] Check SpeedTest")
-    var st = speedtest({maxTime: this.config.maxTime})
-    st.on("downloadspeedprogress", speed => {
-      this.sendSocketNotification("DOWNLOAD", speed.toFixed(2))
-      log("Upload:", speed.toFixed(2))
-    })
-
-    st.on("uploadspeedprogress", speed => {
-      this.sendSocketNotification("UPLOAD", speed.toFixed(2))
-      log("Download:", speed.toFixed(2))
-    })
-
-    st.on("data", data => {
-      this.sendSocketNotification("DATA",data)
-    })
-
-    st.on("error", error => {
-      console.log("[SPEED] error " + error)
-    })
-
+  check: async function() {
+    log("[SPEED] Check SpeedTest")
+    try {
+      var Check = await speedtest({
+        "serverId": this.config.server.preferedId ? this.config.server.preferedId : null,
+        "acceptLicense": this.config.server.acceptLicense,
+        "acceptGdpr": this.config.server.acceptGdpr,
+        "progress": (data) => this.progress(data)
+      })
+    } catch (err) {
+      console.log("[SPEED]", err.message)
+    } finally {
+      if (Check) {
+        log("Result:", Check)
+        this.sendSocketNotification("DATA", Check)
+        log("Done")
+      }
+    }
     this.scheduleUpdate()
+  },
+
+  progress: function(data) {
+    switch (data.type) {
+      case "download":
+        this.sendSocketNotification("DOWNLOAD", this.oToMbps(data.download.bandwidth))
+        log("Download:", this.oToMbps(data.download.bandwidth), "Mbps")
+        break
+      case "upload":
+        this.sendSocketNotification("UPLOAD", this.oToMbps(data.upload.bandwidth))
+        log("Upload:", this.oToMbps(data.upload.bandwidth), "Mbps")
+        break
+      case "ping":
+        this.sendSocketNotification("PING", data.ping.latency)
+        log("Ping:", data.ping.latency, "ms")
+        break
+    }
   },
 
   /** update process **/
@@ -96,5 +110,10 @@ module.exports = NodeHelper.create({
     return ms
   },
 
+  /** Convert octect to Mbps [Match with Speedtest web result] **/
+  oToMbps: function(value) {
+    if (!value) return 0
+    return (value * 0.000008).toFixed(2)
+  }
 });
 

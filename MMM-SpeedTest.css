@@ -17,14 +17,14 @@
 #ST_ISP,
 #ST_Server,
 #ST_Location,
-#ST_Distance {
+#ST_Name {
   display:flex;
 }
 
 #ST_ISP_MARK,
 #ST_Server_MARK,
 #ST_Location_MARK,
-#ST_Distance_MARK {
+#ST_Name_MARK {
   text-align: left;
   margin-right: 5px;
 }
