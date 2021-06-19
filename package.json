@@ -4,7 +4,7 @@
   "description": "SpeedTest Magic Mirror.",
   "main": "index.js",
   "scripts": {
-    "postinstall": "echo 'Building SpeedTest module, please wait...' && electron-rebuild 2>/dev/null >/dev/null"
+    "postinstall": "installer/postinstall.sh"
   },
   "keywords": [
     "internet",
