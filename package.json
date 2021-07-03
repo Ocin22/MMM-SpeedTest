@@ -1,9 +1,10 @@
 {
   "name": "MMM-SpeedTest",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "SpeedTest Magic Mirror.",
   "main": "index.js",
   "scripts": {
+    "preinstall": "installer/preinstall.sh",
     "postinstall": "installer/postinstall.sh"
   },
   "keywords": [
