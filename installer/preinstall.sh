@@ -26,9 +26,6 @@ Installer_module="MMM-SpeedTest"
 Version="$(node -p -e "require('./../package.json').version")"
 Installer_info "Welcome to $Installer_module v$Version"
 
-# delete package-lock.json (force)
-rm -f ../package-lock.json
-
 # Check not run as root
 if [ "$EUID" -eq 0 ]; then
   Installer_error "npm install must not be used as root"
