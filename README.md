@@ -3,7 +3,7 @@
 Bandwidth test from [speedtest.net](https://www.speedtest.net/) servers for MagicMirror
 
 ## Screenshoot
-![](https://raw.githubusercontent.com/bugsounet/MMM-SpeedTest/main/installer/SpeedTest.png)
+![](https://raw.githubusercontent.com/bugsounet/MMM-SpeedTest/master/installer/SpeedTest.png)
 
 ## Install
 
