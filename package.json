@@ -1,6 +1,6 @@
 {
   "name": "MMM-SpeedTest",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "SpeedTest Magic Mirror.",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "author": "bugsounet",
   "license": "MIT",
   "dependencies": {
-    "electron-rebuild": "^2.3.4",
+    "magicmirror-rebuild": "^1.0.3",
     "speedtest-net": "^2.1.1"
   }
 }
