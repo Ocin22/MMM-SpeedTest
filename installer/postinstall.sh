@@ -1,2 +1,2 @@
-echo 'Building SpeedTest module, please wait...' && electron-rebuild 2>/dev/null >/dev/null
+echo 'Building SpeedTest module, please wait...' && MagicMirror-rebuild 2>/dev/null >/dev/null
 
