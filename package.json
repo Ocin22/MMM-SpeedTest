@@ -1,6 +1,6 @@
 {
   "name": "MMM-SpeedTest",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "SpeedTest Magic Mirror.",
   "main": "index.js",
   "scripts": {
