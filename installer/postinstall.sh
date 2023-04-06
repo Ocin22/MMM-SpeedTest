@@ -1,2 +1,35 @@
-echo 'Building SpeedTest module, please wait...' && MagicMirror-rebuild 2>/dev/null >/dev/null
+#!/bin/bash
+# +-----------------+
+# | npm postinstall |
+# +-----------------+
 
+# get the installer directory
+Installer_get_current_dir () {
+  SOURCE="${BASH_SOURCE[0]}"
+  while [ -h "$SOURCE" ]; do
+    DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+    SOURCE="$(readlink "$SOURCE")"
+    [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+  done
+  echo "$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+}
+
+Installer_dir="$(Installer_get_current_dir)"
+
+# move to installler directory
+cd "$Installer_dir"
+source utils.sh
+
+cd ..
+
+Installer_info "Rebuild MagicMirror..."
+MagicMirror-rebuild 2>/dev/null || {
+  Installer_error "Rebuild Failed"
+  exit 255
+}
+Installer_success "Done"
+echo
+
+# module name
+Installer_module="$(grep -Eo '\"name\"[^,]*' ./package.json | grep -Eo '[^:]*$' | awk  -F'\"' '{print $2}')"
+Installer_success "$Installer_module is now installed !"
