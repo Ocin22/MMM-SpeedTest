@@ -5,4 +5,4 @@ Bandwidth test from [speedtest.net](https://www.speedtest.net/) servers for Magi
 ## Screenshoot
 ![](https://raw.githubusercontent.com/bugsounet/MMM-SpeedTest/main/installer/SpeedTest.png)
 
-## Install and other documentation is available on [wiki](https://github.com/bugsounet/MMM-SpeedTest/wiki)
+## Installation and configuration documentation is available on [wiki](https://github.com/bugsounet/MMM-SpeedTest/wiki)
