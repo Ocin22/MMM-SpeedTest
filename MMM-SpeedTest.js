@@ -37,14 +37,12 @@ Module.register("MMM-SpeedTest",{
     this.ping = null
     if (this.config.debug) this.log = (...args) => { console.log("[SPEED]", ...args) }
     else this.log = (...args) => { /* do nothing */ }
-    this.sendSocketNotification("INIT", this.config)
   },
 
   getScripts: function(){
     return [
-      this.file("resources/justgage.js"),
-      this.file("resources/raphael-2.1.4.min.js"),
-      this.file("resources/jquery.js")
+      this.file("components/justgage.js"),
+      this.file("components/raphael-2.1.4.min.js")
     ]
   },
 
@@ -52,31 +50,38 @@ Module.register("MMM-SpeedTest",{
     return ["MMM-SpeedTest.css"]
   },
 
-  notificationReceived: function (noti, payload) {
-    if (noti == "DOM_OBJECTS_CREATED") {
-      this.PrepareDisplay()
-      this.sendSocketNotification('CHECK',this.config)
+  notificationReceived: function (notification, payload, sender) {
+    switch (notification) {
+      case "DOM_OBJECTS_CREATED":
+        this.PrepareDisplay()
+        this.sendSocketNotification("INIT", this.config)
+        break
     }
   },
 
   socketNotificationReceived: function(notification, payload) {
-    if (notification == "DOWNLOAD") {
-      this.log("DOWNLOAD", payload, "Mbps")
-      this.download.refresh(payload)
-    }
-    if (notification == "UPLOAD") {
-      this.log("UPLOAD", payload, "Mbps")
-      if (this.config.upload.display) this.upload.refresh(payload)
-    }
-    if (notification == "PING") {
-      this.DisplayReset()
-      this.log("PING", payload, "ms")
-      if (this.config.ping.display) this.ping.refresh(payload)
-    }
-    if (notification == "DATA") {
-      this.log("DATA", payload)
-      if (this.config.informations) this.DisplayData(payload)
-      this.DisplayFooter()
+    switch (notification) {
+      case "WARNING":
+        this.DisplayError()
+        break
+      case "PING":
+        this.DisplayReset()
+        this.log("PING", payload, "ms")
+        if (this.config.ping.display) this.ping.refresh(payload)
+        break
+      case "DOWNLOAD":
+        this.log("DOWNLOAD", payload, "Mbps")
+        this.download.refresh(payload)
+        break
+      case "UPLOAD":
+        this.log("UPLOAD", payload, "Mbps")
+        if (this.config.upload.display) this.upload.refresh(payload)
+        break
+      case "DATA":
+        this.log("DATA", payload)
+        if (this.config.informations) this.DisplayData(payload)
+        this.DisplayFooter()
+        break
     }
   },
 
@@ -206,12 +211,12 @@ Module.register("MMM-SpeedTest",{
 
     if (this.config.upload.display) {
       upOpts = Object.assign({}, opts, upOpts)
-      this.upload =new JustGage(upOpts)
+      this.upload = new JustGage(upOpts)
     }
 
     if (this.config.ping.display) {
       pingOpts = Object.assign({}, opts, pingOpts)
-      this.ping =new JustGage(pingOpts)
+      this.ping = new JustGage(pingOpts)
     }
   },
 
@@ -250,7 +255,17 @@ Module.register("MMM-SpeedTest",{
   },
 
   DisplayFooter() {
-    var TestDate = document.getElementById("ST_LastTest")
-    TestDate.textContent = "Last Update: " + new Date().toLocaleDateString(config.language, {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+    var LastUpdate = document.getElementById("ST_LastTest")
+    LastUpdate.textContent = "Last Update: " + new Date().toLocaleDateString(config.language, {year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" })
+  },
+
+  // Will display error on Loading library failed...
+  // ToDo better !
+  // @bugsounet
+   DisplayError() {
+    var DisplayError = document.getElementById("ST_LastTest")
+    DisplayError.style.fontSize= "15px"
+    DisplayError.style.color= "#fb0606"
+    DisplayError.textContent = "Main Library not loaded, npm run rebuild needed!"
   }
 });

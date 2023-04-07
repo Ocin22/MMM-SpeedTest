@@ -29,10 +29,6 @@
   margin-right: 5px;
 }
 
-#ST_LastTest {
-  displ: this;
-}
-
 #ST_LastTest.date {
   font-size: 10px;
   line-height: 16px;

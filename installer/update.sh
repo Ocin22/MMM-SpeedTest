@@ -1,7 +1,7 @@
 #!/bin/bash
-# +----------------+
-# | npm preinstall |
-# +----------------+
+# +---------+
+# | updater |
+# +---------+
 
 # get the installer directory
 Installer_get_current_dir () {
@@ -23,7 +23,6 @@ source utils.sh
 # Go back to module root
 cd ..
 
-echo
 # check version in package.json file
 Installer_version="$(grep -Eo '\"version\"[^,]*' ./package.json | grep -Eo '[^:]*$' | awk  -F'\"' '{print $2}')"
 Installer_module="$(grep -Eo '\"name\"[^,]*' ./package.json | grep -Eo '[^:]*$' | awk  -F'\"' '{print $2}')"
@@ -34,39 +33,38 @@ Installer_info "Welcome to $Installer_module v$Installer_version"
 echo
 
 # Check not run as root
-Installer_info "No root checking..."
 if [ "$EUID" -eq 0 ]; then
   Installer_error "npm install must not be used as root"
-  exit 255
+  exit 1
 fi
-Installer_chk "$(pwd)/" "$Installer_module"
-Installer_chk "$(pwd)/../../" "MagicMirror"
-echo
 
 # Check platform compatibility
 Installer_info "Checking OS..."
 Installer_checkOS
 if  [ "$platform" == "osx" ]; then
   Installer_error "OS Detected: $OSTYPE ($os_name $os_version $arch)"
-  Installer_error "Automatic installation is not included"
-  echo
-  exit 255
+  Installer_error "This module is not compatible with your system"
+  exit 0
 else
-  if  [ "$os_name" == "raspbian" ] && [ "$os_version" -lt 11 ]; then
-    Installer_error "OS Detected: $OSTYPE ($os_name $os_version $arch)"
-    Installer_error "Unfortunately, this module is not compatible with your OS"
-    Installer_error "Try to update your OS to the lasted version of raspbian"
-    echo
-    exit 255
-  else
-    Installer_success "OS Detected: $OSTYPE ($os_name $os_version $arch)"
-  fi
+  Installer_success "OS Detected: $OSTYPE ($os_name $os_version $arch)"
 fi
 
 echo
-#check dependencies
-dependencies=(build-essential)
-Installer_info "Checking all dependencies..."
-Installer_update_dependencies
-Installer_success "All Dependencies needed are installed !"
+
+# deleting package.json because npm install add/update package
+rm -f package-lock.json
+
+Installer_info "Updating..."
+
+git reset --hard HEAD
+git pull
+
 echo
+Installer_info "Deleting ALL @bugsounet libraries..."
+rm -rf node_modules/@bugsounet
+
+echo
+Installer_info "Ready for Installing..."
+
+# launch installer
+npm install
