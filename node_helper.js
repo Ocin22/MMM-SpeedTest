@@ -5,30 +5,35 @@
  */
 
 var NodeHelper = require('node_helper');
-var speedtest = require('speedtest-net');
+var _loadLib = require("./components/loadLibraries.js") // <-- main code for loading libraries
 
 let log = (...args) => { /* do nothing */ }
 
 module.exports = NodeHelper.create({
   start: function(){
-    console.log("[SPEED] MMM-SpeedTest Version:", require('./package.json').version)
+    this.lib = { error: 0 }
     this.config = null
     this.interval = null
   },
 
-  socketNotificationReceived : function(notification, payload){
-    if (notification == "INIT") {
-      this.config= payload
-      this.config.update= this.getUpdateTime(this.config.update)
-      if (this.config.debug) log = (...args) => { console.log("[SPEED]", ...args) }
-    }
-    if (notification == 'CHECK') this.check()
+  socketNotificationReceived: function(notification, payload){
+    if (notification == "INIT") this.initialize(payload)
+  },
+
+  initialize: async function(payload) {
+    console.log("[SPEED] MMM-SpeedTest Version:", require('./package.json').version)
+    this.config= payload
+    this.config.update= this.getUpdateTime(this.config.update)
+    if (this.config.debug) log = (...args) => { console.log("[SPEED]", ...args) }
+    await _loadLib.load(this) // <-- try to load sensible library (speedtest-net)
+    if (this.lib.error) return // <-- verify if no errors // if error stop module !
+    this.check() // <--- execute speed check
   },
 
   check: async function() {
     log("[SPEED] Check SpeedTest")
     try {
-      var Check = await speedtest({
+      var Check = await this.lib.speedtest({
         "serverId": this.config.server.preferedId ? this.config.server.preferedId : null,
         "acceptLicense": this.config.server.acceptLicense,
         "acceptGdpr": this.config.server.acceptGdpr,
