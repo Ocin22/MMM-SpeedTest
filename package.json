@@ -18,7 +18,7 @@
   "author": "bugsounet",
   "license": "MIT",
   "dependencies": {
-    "electron-rebuild": "^3.6.0",
+    "@electron/rebuild": "^3.6.0",
     "speedtest-net": "^2.2.0",
     "check-node-version": "^4.2.1",
     "glob": "^9.2.1",
