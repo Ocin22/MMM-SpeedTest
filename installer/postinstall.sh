@@ -29,7 +29,8 @@ echo
 cd ..
 
 Installer_info "Rebuild MagicMirror..."
-MagicMirror-rebuild 2>/dev/null || {
+# Get the version of electron found in the main magic mirror package.json
+electron-rebuild --version $(grep -Po '"electron": "\^\K[^"]+' ../../package.json) 2>/dev/null || {
   Installer_error "Rebuild Failed"
   exit 255
 }
